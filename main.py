@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     # フォルダA内のすべてのファイルを再帰的に取得
     for root, dirs, files in os.walk(source_folder):
-        # "ja-JP"以外の"xx-XX"または"xx-XXX"形式のサブフォルダをスキップ
+        # "xx-XX"または"xx-XXX"形式のサブフォルダに関しては，"ja-JP"を除いてすべてスキップする
         if any(part for part in root.split(os.sep) if part != "ja-JP" and len(part) >= 5 and '-' in part):
             continue  # 条件を満たした場合スキップ
 
@@ -112,34 +112,30 @@ if __name__ == "__main__":
                     print(f"更新しました: {source_file} -> {destination_file}")
 
 
-    # ファイルを比較する
+    # admlファイルを比較する
     # フォルダAとフォルダBのパスを指定
-    folder_a = f"{download_dir}PolicyDefinitions"
-    folder_b = f"{download_dir}new_PolicyDefinitions"
+    folder_a = f"{download_dir}PolicyDefinitions/ja-JP"
+    folder_b = f"{download_dir}new_PolicyDefinitions/ja-JP"
     output_folder = "/mnt/DiffOutput"  # 差分出力用のフォルダ
 
     # 差分出力フォルダを作成（存在しない場合）
     os.makedirs(output_folder, exist_ok=True)
 
     # フォルダA内のすべての`.adml`ファイルを取得
-    for root_a, dirs_a, files_a in os.walk(folder_a):
+    for root_a, _, files_a in os.walk(folder_a):
         for file_name in files_a:
             if not file_name.endswith('.adml'):
                 continue
 
             file_a_path = os.path.join(root_a, file_name)
 
-            # フォルダB内を検索し、同じファイル名のものを探す
-            file_b_path = None
-            for root_b, _, files_b in os.walk(folder_b):
-                if file_name in files_b:
-                    file_b_path = os.path.join(root_b, file_name)
-                    break
+            # フォルダBの `ja-JP` 内に同じファイルがあるか確認
+            corresponding_b_path = os.path.join(folder_b, os.path.relpath(file_a_path, folder_a))
 
             # フォルダBに対応するファイルが存在する場合のみ比較
-            if file_b_path and os.path.exists(file_b_path):
-                functions.compare_text_files(file_a_path, file_b_path, 'utf-16', file_name, output_folder)
-                functions.compare_text_files(file_a_path, file_b_path, 'utf-8', file_name, output_folder)
+            if os.path.exists(corresponding_b_path):
+                functions.compare_text_files(file_a_path, corresponding_b_path, 'utf-16', file_name, output_folder)
+                functions.compare_text_files(file_a_path, corresponding_b_path, 'utf-8', file_name, output_folder)
 
 
     # 差分ファイルに使用中のポリシーが含まれているか確認する

@@ -7,7 +7,6 @@ import urllib.request
 import os
 from urllib.parse import urlparse
 from urllib.parse import unquote
-from bs4 import BeautifulSoup
 import difflib
 import json
 
@@ -101,11 +100,18 @@ def clicker(target, xpath=None):
 def compare_text_files(file_a_path, file_b_path, encoding, file_name, output_folder):
     try:
         with open(file_a_path, 'r', encoding=encoding) as file_a, open(file_b_path, 'r', encoding=encoding) as file_b:
+            print(f"{file_a_path} と {file_b_path} を比較しています")
+            
+            # 行ごとの文字数制限を適用（1000文字を超える行は除外）
+            lines_a = [line for line in file_a.readlines() if len(line) <= 1000]
+            lines_b = [line for line in file_b.readlines() if len(line) <= 1000]
+
+            # 差分取得
             diff = list(difflib.unified_diff(
-                file_a.readlines(),
-                file_b.readlines(),
-                fromfile = file_a_path,
-                tofile = file_b_path
+                lines_a,
+                lines_b,
+                fromfile=file_a_path,
+                tofile=file_b_path
             ))
 
             if diff:
@@ -114,9 +120,11 @@ def compare_text_files(file_a_path, file_b_path, encoding, file_name, output_fol
                 with open(diff_output_path, 'w', encoding='utf-8') as diff_file:
                     diff_file.write(''.join(diff))
                 print(f"差分をファイルに出力しました: {diff_output_path}")
+
             return True
     except UnicodeDecodeError:
         return False
+
 
 
 def search_in_diff_output_folder(search_term, diff_output_folder, source_html_file, output_file):
@@ -131,11 +139,7 @@ def search_in_diff_output_folder(search_term, diff_output_folder, source_html_fi
                         if search_term in line:
                             output_line = (
                                 "-----------------------------------------------------------\n"
-                                "このレポートに含まれるポリシーは，新しいテンプレートで内容が変更されています\n"
-                                f"ポリシーレポート: {source_html_file}\n"
-                                f"ポリシー名: {search_term}\n"
-                                f"ポリシーテンプレート: {file}\n"
-                                f"行番号: {line_number}\n"
+                                f"ポリシー名: {search_term} | ポリシーテンプレート: {file} | 行番号: {line_number} | ポリシーレポート: {source_html_file}\n"
                                 #f"内容: {line.strip()}\n"
                                 "-----------------------------------------------------------\n"
                             )
