@@ -74,13 +74,15 @@ if __name__ == "__main__":
     for file in files:
         subprocess.run(["7z", "x", file, f"-o{base_extract_dir}"], check=True)
 
-    # 解凍前のファイルを削除
-    for file_extension in ["*.zip", "*.cab", "*.msi", "*.exe"]:
-        for file in glob.glob(f"{download_dir}{file_extension}"):
-            os.remove(file)
+    # # 解凍前のファイルを削除
+    # for file_extension in ["*.zip", "*.cab", "*.msi", "*.exe"]:
+    #     for file in glob.glob(f"{download_dir}{file_extension}"):
+    #         os.remove(file)
 
     # OneDrive.admlを移動
-    shutil.copy(f"{download_dir}OneDrive.adml", f"{download_dir}new_policy/")
+    one_drive_adml = f"{download_dir}OneDrive.adml"
+    if os.path.exists(one_drive_adml):
+        shutil.copy(one_drive_adml, f"{download_dir}new_policy/")
 
     # 既存ポリシーテンプレートを複製
     shutil.copytree(
@@ -101,15 +103,20 @@ if __name__ == "__main__":
 
         for file in files:
             source_file = os.path.join(root, file)
+            rel_path = os.path.relpath(source_file, source_folder)
 
-            # フォルダB内で同名ファイルを検索
-            for dest_root, dest_dirs, dest_files in os.walk(destination_folder):
-                if file in dest_files:
-                    destination_file = os.path.join(dest_root, file)
+            # ja-JPディレクトリがパスに含まれているか判定
+            if os.sep + "ja-JP" + os.sep in source_file or source_file.endswith(os.sep + "ja-JP" + os.sep + file):
+                # /ja-JP/直下にコピー
+                destination_file = os.path.join(destination_folder, "ja-JP", file)
+            else:
+                # 通常通り相対パスでコピー
+                destination_file = os.path.join(destination_folder, rel_path)
 
-                    # 上書きコピーを実行
-                    shutil.copy2(source_file, destination_file)
-                    print(f"更新しました: {source_file} -> {destination_file}")
+            # 対象のファイルがdestinationに存在する場合のみ上書き
+            if os.path.exists(destination_file):
+                shutil.copy2(source_file, destination_file)
+                print(f"更新しました: {source_file} -> {destination_file}")
 
 
     # admlファイルを比較する

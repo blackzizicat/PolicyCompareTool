@@ -19,19 +19,8 @@
 1. ADからポリシーテンプレートとポリシーレポートを取得する
 	- ccad02にRDPして`\\ccmaster\SYSVOL\ccmaster.kyoto-su.ac.jp\Policies\PolicyDefinitions`をクリップボード経由でローカルにコピー
 	- ccad02の「PolicyReport出力」プログラムを実行して，`C:\Admin` に作成された `YYYYMMDD_PolicyReport` をローカルにコピー
-（ポリシーが入っているOUは下記のみ）
-```
-Domain Controllers
-Machine_11_2025
-Machine_M365Device
-Machine_Servers1
-Machine_Servers2
-Misc0
-syokuin0
-```
-
+    
 2. 事前にアップデート済みの端末から`C:\Program Files\Microsoft OneDrive\<バージョン番号>\adm\ja\OneDrive.adml`を取得してくる
-
 
 3. `PolicyDefinitions`, `YYYYMMDD_PolicyReport`, `OneDrive.adml`を，
 `PolicyCompareTool`フォルダ内の`download`フォルダ下に配置する
