@@ -11,36 +11,36 @@ if __name__ == "__main__":
 
     download_dir = "/mnt/download"
 
-    # Webからファイルを取得
-    try:
-        # windows
-        win_latest_policy_link = functions.clicker(
-            "https://learn.microsoft.com/en-us/troubleshoot/windows-client/group-policy/create-and-manage-central-store#links-to-download-the-administrative-templates-files-based-on-the-operating-system-version",
-            '//*[@id="main"]/div[2]/div[1]/div[5]/ul[1]/li[1]/a'
-        )
-        win_download_link = functions.clicker(win_latest_policy_link,'//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/a')
-        functions.clicker(win_download_link)
+    # # Webからファイルを取得
+    # try:
+    #     # windows
+    #     win_latest_policy_link = functions.clicker(
+    #         "https://learn.microsoft.com/en-us/troubleshoot/windows-client/group-policy/create-and-manage-central-store#links-to-download-the-administrative-templates-files-based-on-the-operating-system-version",
+    #         '//*[@id="main"]/div[2]/div[1]/div[5]/ul[1]/li[1]/a'
+    #     )
+    #     win_download_link = functions.clicker(win_latest_policy_link,'//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/a')
+    #     functions.clicker(win_download_link)
         
-        # edge
-        edge_download_link = functions.clicker(
-            "https://www.microsoft.com/ja-jp/edge/business/download",
-            '//*[@id="main"]/div/div[1]/div[1]/section[1]/div/div/div/div[3]/div[1]/div[2]/button[2]'
-        )
-        functions.clicker(edge_download_link)
+    #     # edge
+    #     edge_download_link = functions.clicker(
+    #         "https://www.microsoft.com/ja-jp/edge/business/download",
+    #         '//*[@id="main"]/div/div[1]/div[1]/section[1]/div/div/div/div[3]/div[1]/div[2]/button[2]'
+    #     )
+    #     functions.clicker(edge_download_link)
 
-        # chrome
-        functions.clicker("https://dl.google.com/dl/edgedl/chrome/policy/policy_templates.zip")
-        functions.clicker("http://dl.google.com/update2/enterprise/googleupdateadmx.zip")
+    #     # chrome
+    #     functions.clicker("https://dl.google.com/dl/edgedl/chrome/policy/policy_templates.zip")
+    #     functions.clicker("http://dl.google.com/update2/enterprise/googleupdateadmx.zip")
 
-        # # office
-        # office_download_link = functions.clicker(
-        #     "https://www.microsoft.com/en-us/download/details.aspx?id=49030",
-        #     '//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/button'
-        # )
-        # functions.clicker(office_download_link)
+    #     # # office
+    #     # office_download_link = functions.clicker(
+    #     #     "https://www.microsoft.com/en-us/download/details.aspx?id=49030",
+    #     #     '//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/button'
+    #     # )
+    #     # functions.clicker(office_download_link)
 
-    finally:
-        functions.driver.quit()
+    # finally:
+    #     functions.driver.quit()
 
 
     # ファイルを比較可能な状態に整える
@@ -98,28 +98,28 @@ if __name__ == "__main__":
     destination_folder = f"{download_dir}/new_PolicyDefinitions"
 
     # フォルダA内のすべてのファイルを再帰的に取得
-for root, dirs, files in os.walk(source_folder):
-    # "xx-XX"または"xx-XXX"形式のサブフォルダに関しては，"ja-JP"や"ja-jp"を除いてすべてスキップする
-    if any(part for part in root.split(os.sep) if part.lower() != "ja-jp" and len(part) >= 5 and '-' in part):
-        continue  # 条件を満たした場合スキップ
+    for root, dirs, files in os.walk(source_folder):
+        # "xx-XX"または"xx-XXX"形式のサブフォルダに関しては，"ja-JP"や"ja-jp"を除いてすべてスキップする
+        if any(part for part in root.split(os.sep) if part.lower() != "ja-jp" and len(part) >= 5 and '-' in part):
+            continue  # 条件を満たした場合スキップ
 
-    for file in files:
-        source_file = os.path.join(root, file)
-        rel_path = os.path.relpath(source_file, source_folder)
+        for file in files:
+            source_file = os.path.join(root, file)
+            rel_path = os.path.relpath(source_file, source_folder)
 
-        # ja-JP/ja-jpディレクトリがパスに含まれているか判定
-        if (os.sep + "ja-JP" + os.sep in source_file or os.sep + "ja-jp" + os.sep in source_file or
-            source_file.lower().endswith(os.sep + "ja-jp" + os.sep + file.lower())):
-            # /ja-JP/直下にコピー
-            destination_file = os.path.join(destination_folder, "ja-JP", file)
-        else:
-            # 通常通り相対パスでコピー
-            destination_file = os.path.join(destination_folder, rel_path)
+            # ja-JP/ja-jpディレクトリがパスに含まれているか判定
+            if (os.sep + "ja-JP" + os.sep in source_file or os.sep + "ja-jp" + os.sep in source_file or
+                source_file.lower().endswith(os.sep + "ja-jp" + os.sep + file.lower())):
+                # /ja-JP/直下にコピー
+                destination_file = os.path.join(destination_folder, "ja-JP", file)
+            else:
+                # 通常通り相対パスでコピー
+                destination_file = os.path.join(destination_folder, rel_path)
 
-        # 対象のファイルがdestinationに存在する場合のみ上書き
-        if os.path.exists(destination_file):
-            shutil.copy2(source_file, destination_file)
-            print(f"更新しました: {source_file} -> {destination_file}")
+            # 対象のファイルがdestinationに存在する場合のみ上書き
+            if os.path.exists(destination_file):
+                shutil.copy2(source_file, destination_file)
+                print(f"更新しました: {source_file} -> {destination_file}")
 
 
     # admlファイルを比較する
