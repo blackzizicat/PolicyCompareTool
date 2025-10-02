@@ -11,36 +11,36 @@ if __name__ == "__main__":
 
     download_dir = "/mnt/download"
 
-    # # Webからファイルを取得
-    # try:
-    #     # windows
-    #     win_latest_policy_link = functions.clicker(
-    #         "https://learn.microsoft.com/en-us/troubleshoot/windows-client/group-policy/create-and-manage-central-store#links-to-download-the-administrative-templates-files-based-on-the-operating-system-version",
-    #         '//*[@id="main"]/div[2]/div[1]/div[5]/ul[1]/li[1]/a'
-    #     )
-    #     win_download_link = functions.clicker(win_latest_policy_link,'//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/a')
-    #     functions.clicker(win_download_link)
+    # Webからファイルを取得
+    try:
+        # windows
+        win_latest_policy_link = functions.clicker(
+            "https://learn.microsoft.com/en-us/troubleshoot/windows-client/group-policy/create-and-manage-central-store#links-to-download-the-administrative-templates-files-based-on-the-operating-system-version",
+            '//*[@id="main"]/div[2]/div[1]/div[5]/ul[1]/li[1]/a'
+        )
+        win_download_link = functions.clicker(win_latest_policy_link,'//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/a')
+        functions.clicker(win_download_link)
         
-    #     # edge
-    #     edge_download_link = functions.clicker(
-    #         "https://www.microsoft.com/ja-jp/edge/business/download",
-    #         '//*[@id="main"]/div/div[1]/div[1]/section[1]/div/div/div/div[3]/div[1]/div[2]/button[2]'
-    #     )
-    #     functions.clicker(edge_download_link)
+        # edge
+        edge_download_link = functions.clicker(
+            "https://www.microsoft.com/ja-jp/edge/business/download",
+            '//*[@id="main"]/div/div[1]/div[1]/section[1]/div/div/div/div[3]/div[1]/div[2]/button[2]'
+        )
+        functions.clicker(edge_download_link)
 
-    #     # chrome
-    #     functions.clicker("https://dl.google.com/dl/edgedl/chrome/policy/policy_templates.zip")
-    #     functions.clicker("http://dl.google.com/update2/enterprise/googleupdateadmx.zip")
+        # chrome
+        functions.clicker("https://dl.google.com/dl/edgedl/chrome/policy/policy_templates.zip")
+        functions.clicker("http://dl.google.com/update2/enterprise/googleupdateadmx.zip")
 
-    #     # # office
-    #     # office_download_link = functions.clicker(
-    #     #     "https://www.microsoft.com/en-us/download/details.aspx?id=49030",
-    #     #     '//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/button'
-    #     # )
-    #     # functions.clicker(office_download_link)
+        # # office
+        # office_download_link = functions.clicker(
+        #     "https://www.microsoft.com/en-us/download/details.aspx?id=49030",
+        #     '//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/button'
+        # )
+        # functions.clicker(office_download_link)
 
-    # finally:
-    #     functions.driver.quit()
+    finally:
+        functions.driver.quit()
 
 
     # ファイルを比較可能な状態に整える
