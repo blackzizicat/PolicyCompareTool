@@ -8,7 +8,6 @@ import os
 from urllib.parse import urlparse
 from urllib.parse import unquote
 import difflib
-import json
 
 
 options = Options()

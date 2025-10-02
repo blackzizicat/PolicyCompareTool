@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 
 if __name__ == "__main__":
 
-    download_dir = "/mnt/download/"
+    download_dir = "/mnt/download"
 
     # Webからファイルを取得
     try:
@@ -32,12 +32,12 @@ if __name__ == "__main__":
         functions.clicker("https://dl.google.com/dl/edgedl/chrome/policy/policy_templates.zip")
         functions.clicker("http://dl.google.com/update2/enterprise/googleupdateadmx.zip")
 
-        # office
-        office_download_link = functions.clicker(
-            "https://www.microsoft.com/en-us/download/details.aspx?id=49030",
-            '//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/button'
-        )
-        functions.clicker(office_download_link)
+        # # office
+        # office_download_link = functions.clicker(
+        #     "https://www.microsoft.com/en-us/download/details.aspx?id=49030",
+        #     '//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/button'
+        # )
+        # functions.clicker(office_download_link)
 
     finally:
         functions.driver.quit()
@@ -45,14 +45,14 @@ if __name__ == "__main__":
 
     # ファイルを比較可能な状態に整える
     # 必要なディレクトリを作成
-    os.makedirs(f"{download_dir}new_policy/", exist_ok=True)
+    os.makedirs(f"{download_dir}/new_policy/", exist_ok=True)
 
     # .cab ファイルを .zip に変換する
-    subprocess.run(["cabextract", "-d", download_dir, f"{download_dir}MicrosoftEdgePolicyTemplates.cab"])
+    subprocess.run(["cabextract", "-d", download_dir, f"{download_dir}/MicrosoftEdgePolicyTemplates.cab"])
 
     # downloadディレクトリ内の .zip を解凍
     # 解凍先のベースディレクトリ
-    base_extract_dir = f"{download_dir}new_policy/"
+    base_extract_dir = f"{download_dir}/new_policy/"
     # `.zip` ファイルを検索
     zip_files = glob.glob(os.path.join(download_dir, "*.zip"))
 
@@ -76,53 +76,56 @@ if __name__ == "__main__":
 
     # # 解凍前のファイルを削除
     # for file_extension in ["*.zip", "*.cab", "*.msi", "*.exe"]:
-    #     for file in glob.glob(f"{download_dir}{file_extension}"):
+    #     for file in glob.glob(f"{download_dir}/{file_extension}"):
     #         os.remove(file)
 
     # OneDrive.admlを移動
-    one_drive_adml = f"{download_dir}OneDrive.adml"
-    if os.path.exists(one_drive_adml):
-        shutil.copy(one_drive_adml, f"{download_dir}new_policy/")
+    one_drive_admx = f"{download_dir}/adm/OneDrive.admx"
+    one_drive_adml = f"{download_dir}/adm/OneDrive.adml"
+    if os.path.exists(one_drive_admx):
+        shutil.copy(one_drive_admx, f"{download_dir}/new_policy/")
+        shutil.copy(one_drive_adml, f"{download_dir}/new_policy/")
 
     # 既存ポリシーテンプレートを複製
     shutil.copytree(
-        f"{download_dir}PolicyDefinitions/",
-        f"{download_dir}new_PolicyDefinitions/",
+        f"{download_dir}/PolicyDefinitions/",
+        f"{download_dir}/new_PolicyDefinitions/",
         dirs_exist_ok=True
     )
 
     # 既存のポリシーファイルの中で、更新があったファイルのみ、新しいファイルで上書きする
-    source_folder = f"{download_dir}new_policy"
-    destination_folder = f"{download_dir}new_PolicyDefinitions"
+    source_folder = f"{download_dir}/new_policy"
+    destination_folder = f"{download_dir}/new_PolicyDefinitions"
 
     # フォルダA内のすべてのファイルを再帰的に取得
-    for root, dirs, files in os.walk(source_folder):
-        # "xx-XX"または"xx-XXX"形式のサブフォルダに関しては，"ja-JP"を除いてすべてスキップする
-        if any(part for part in root.split(os.sep) if part != "ja-JP" and len(part) >= 5 and '-' in part):
-            continue  # 条件を満たした場合スキップ
+for root, dirs, files in os.walk(source_folder):
+    # "xx-XX"または"xx-XXX"形式のサブフォルダに関しては，"ja-JP"や"ja-jp"を除いてすべてスキップする
+    if any(part for part in root.split(os.sep) if part.lower() != "ja-jp" and len(part) >= 5 and '-' in part):
+        continue  # 条件を満たした場合スキップ
 
-        for file in files:
-            source_file = os.path.join(root, file)
-            rel_path = os.path.relpath(source_file, source_folder)
+    for file in files:
+        source_file = os.path.join(root, file)
+        rel_path = os.path.relpath(source_file, source_folder)
 
-            # ja-JPディレクトリがパスに含まれているか判定
-            if os.sep + "ja-JP" + os.sep in source_file or source_file.endswith(os.sep + "ja-JP" + os.sep + file):
-                # /ja-JP/直下にコピー
-                destination_file = os.path.join(destination_folder, "ja-JP", file)
-            else:
-                # 通常通り相対パスでコピー
-                destination_file = os.path.join(destination_folder, rel_path)
+        # ja-JP/ja-jpディレクトリがパスに含まれているか判定
+        if (os.sep + "ja-JP" + os.sep in source_file or os.sep + "ja-jp" + os.sep in source_file or
+            source_file.lower().endswith(os.sep + "ja-jp" + os.sep + file.lower())):
+            # /ja-JP/直下にコピー
+            destination_file = os.path.join(destination_folder, "ja-JP", file)
+        else:
+            # 通常通り相対パスでコピー
+            destination_file = os.path.join(destination_folder, rel_path)
 
-            # 対象のファイルがdestinationに存在する場合のみ上書き
-            if os.path.exists(destination_file):
-                shutil.copy2(source_file, destination_file)
-                print(f"更新しました: {source_file} -> {destination_file}")
+        # 対象のファイルがdestinationに存在する場合のみ上書き
+        if os.path.exists(destination_file):
+            shutil.copy2(source_file, destination_file)
+            print(f"更新しました: {source_file} -> {destination_file}")
 
 
     # admlファイルを比較する
     # フォルダAとフォルダBのパスを指定
-    folder_a = f"{download_dir}PolicyDefinitions/ja-JP"
-    folder_b = f"{download_dir}new_PolicyDefinitions/ja-JP"
+    folder_a = f"{download_dir}/PolicyDefinitions/ja-JP"
+    folder_b = f"{download_dir}/new_PolicyDefinitions/ja-JP"
     output_folder = "/mnt/DiffOutput"  # 差分出力用のフォルダ
 
     # 差分出力フォルダを作成（存在しない場合）
