@@ -15,8 +15,8 @@ if __name__ == "__main__":
     try:
         # windows
         win_latest_policy_link = functions.clicker(
-            "https://learn.microsoft.com/en-us/troubleshoot/windows-client/group-policy/create-and-manage-central-store#links-to-download-the-administrative-templates-files-based-on-the-operating-system-version",
-            '//*[@id="main"]/div[2]/div[1]/div[5]/ul[1]/li[1]/a'
+            "https://learn.microsoft.com/en-us/troubleshoot/windows-client/group-policy/create-and-manage-central-store",
+            '//*[@id="main"]/div[2]/div[1]/div[6]/ul[1]/li[2]/a'
         )
         win_download_link = functions.clicker(win_latest_policy_link,'//*[@id="rootContainer_DLCDetails"]/section[3]/div/div/div/div/div/a')
         functions.clicker(win_download_link)
@@ -93,33 +93,47 @@ if __name__ == "__main__":
         dirs_exist_ok=True
     )
 
-    # 既存のポリシーファイルの中で、更新があったファイルのみ、新しいファイルで上書きする
-    source_folder = f"{download_dir}/new_policy"
-    destination_folder = f"{download_dir}/new_PolicyDefinitions"
 
-    # フォルダA内のすべてのファイルを再帰的に取得
-    for root, dirs, files in os.walk(source_folder):
-        # "xx-XX"または"xx-XXX"形式のサブフォルダに関しては，"ja-JP"や"ja-jp"を除いてすべてスキップする
-        if any(part for part in root.split(os.sep) if part.lower() != "ja-jp" and len(part) >= 5 and '-' in part):
-            continue  # 条件を満たした場合スキップ
+source_folder = f"{download_dir}/new_policy"
+destination_folder = f"{download_dir}/new_PolicyDefinitions"
 
-        for file in files:
-            source_file = os.path.join(root, file)
-            rel_path = os.path.relpath(source_file, source_folder)
-
-            # ja-JP/ja-jpディレクトリがパスに含まれているか判定
-            if (os.sep + "ja-JP" + os.sep in source_file or os.sep + "ja-jp" + os.sep in source_file or
-                source_file.lower().endswith(os.sep + "ja-jp" + os.sep + file.lower())):
-                # /ja-JP/直下にコピー
-                destination_file = os.path.join(destination_folder, "ja-JP", file)
+def find_files_by_name(root_dir, filename, case_insensitive=True):
+    """root_dir配下で、同名のファイルパスをすべて返す"""
+    matches = []
+    for r, d, files in os.walk(root_dir):
+        for f in files:
+            if case_insensitive:
+                if f.lower() == filename.lower():
+                    matches.append(os.path.join(r, f))
             else:
-                # 通常通り相対パスでコピー
-                destination_file = os.path.join(destination_folder, rel_path)
+                if f == filename:
+                    matches.append(os.path.join(r, f))
+    return matches
 
-            # 対象のファイルがdestinationに存在する場合のみ上書き
-            if os.path.exists(destination_file):
-                shutil.copy2(source_file, destination_file)
-                print(f"更新しました: {source_file} -> {destination_file}")
+
+for root, dirs, files in os.walk(source_folder):
+    # "xx-XX"や"xx-XXX"のロケール風サブフォルダは ja-JP/ja-jp 以外スキップ
+    parts = root.split(os.sep)
+    if any(p for p in parts if p.lower() != "ja-jp" and len(p) >= 5 and '-' in p):
+        continue
+
+    for file in files:
+        source_file = os.path.join(root, file)
+
+        # すべてのファイルについてコピー先全体を検索（柔軟運用）
+        search_root = destination_folder
+
+        # 同名ファイルをコピー先で検索（フォルダ階層は無視）
+        candidates = find_files_by_name(search_root, file, case_insensitive=True)
+
+        if not candidates:
+            # 見つからなければ何もしない
+            # print(f"スキップ（同名ファイルなし）: {file}")
+            continue
+
+        # 見つかった同名ファイルすべてを上書き
+        for dest_path in candidates:
+            shutil.copy2(source_file, dest_path)
 
 
     # admlファイルを比較する
